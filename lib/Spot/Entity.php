@@ -9,6 +9,7 @@ namespace Spot;
 abstract class Entity implements EntityInterface, \JsonSerializable
 {
     protected static $table;
+    protected static $schema = null;
     protected static $tableOptions = [];
     protected static $mapper = false;
 
@@ -75,6 +76,13 @@ abstract class Entity implements EntityInterface, \JsonSerializable
         }
 
         return static::$table;
+    }
+
+    /**
+    *  Table schema getter
+    */
+    public static function schema() {
+        return static::$schema;
     }
 
     /**

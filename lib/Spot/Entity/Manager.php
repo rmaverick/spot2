@@ -21,6 +21,7 @@ class Manager
 
     // Table info
     protected $table;
+    protected $schema;
     protected $tableOptions;
     protected $mapper;
 
@@ -60,6 +61,7 @@ class Manager
                 throw new \InvalidArgumentException("Entity must have a table defined. Please define a protected static property named 'table' on your '" . $entityName . "' entity class.");
             }
             $this->table = $entityTable;
+            $this->schema = $entityName::schema();
 
             // Table Options
             $entityTableOptions = $entityName::tableOptions();
@@ -304,6 +306,20 @@ class Manager
         }
 
         return $this->table;
+    }
+
+    /**
+     * Get name of table schema for given entity class
+     *
+     * @return string
+     */
+    public function schema() {
+
+         if ($this->table === null) {
+            $this->fields();
+        }
+
+        return $this->schema;
     }
 
     /**

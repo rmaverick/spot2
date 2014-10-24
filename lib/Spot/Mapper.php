@@ -241,6 +241,19 @@ class Mapper implements MapperInterface
     }
 
     /**
+     * Get table name with schema
+     *
+     * @return string Name of table defined on entity class
+     */
+    public function tableWithSchema() {
+        $table = $this->entityManager()->table();
+        $schema = $this->entityManager()->schema();
+
+        if(is_null($schema)) return $table;
+        else return $schema .'.'.$table;
+    }
+
+    /**
      * Get formatted fields with all neccesary array keys and values.
      * Merges defaults with defined field values to ensure all options exist for each field.
      *
@@ -623,8 +636,8 @@ class Mapper implements MapperInterface
     public function select($fields = "*")
     {
         $table = $this->table();
-
-        return $this->queryBuilder()->select($fields)->from($table, $table);
+        $tableWithSchema = $this->tableWithSchema();
+        return $this->queryBuilder()->select($fields)->from($tableWithSchema, $table);
     }
 
     /**
@@ -713,7 +726,8 @@ class Mapper implements MapperInterface
 
             // Send to adapter via named connection
             $table = $this->table();
-            $result = $this->resolver()->create($table, $data);
+            $tableWitchSchema = $this->tableWithSchema();
+            $result = $this->resolver()->create($tableWitchSchema, $data);
 
             if ($result) {
                 $connection = $this->connection();
@@ -800,7 +814,7 @@ class Mapper implements MapperInterface
         $data = $this->convertToDatabaseValues($entityName, $data);
 
         if (count($data) > 0) {
-            $result = $this->connection()->update($this->table(), $data, array($this->primaryKeyField() => $this->primaryKey($entity)));
+            $result = $this->connection()->update($this->tableWithSchema(), $data, array($this->primaryKeyField() => $this->primaryKey($entity)));
 
             // Run afterSave and afterUpdate
             if (
@@ -861,7 +875,7 @@ class Mapper implements MapperInterface
                 return false;
             }
 
-            $query = $this->queryBuilder()->delete($this->table())->where($conditions);
+            $query = $this->queryBuilder()->delete($this->tableWithSchema())->where($conditions);
             $result = $this->resolver()->exec($query);
 
             // Run afterDelete
@@ -871,7 +885,7 @@ class Mapper implements MapperInterface
 
         // Passed array of conditions
         } elseif (is_array($conditions)) {
-            $query = $this->queryBuilder()->delete($this->table())->where($conditions);
+            $query = $this->queryBuilder()->delete($this->tableWithSchema())->where($conditions);
 
             return $this->resolver()->exec($query);
         }
@@ -952,7 +966,7 @@ class Mapper implements MapperInterface
      */
     public function truncateTable($cascade = false)
     {
-        return $this->resolver()->truncate($this->table(), $cascade);
+        return $this->resolver()->truncate($this->tableWithSchema(), $cascade);
     }
 
     /**
@@ -963,7 +977,7 @@ class Mapper implements MapperInterface
      */
     public function dropTable()
     {
-        return $this->resolver()->dropTable($this->table());
+        return $this->resolver()->dropTable($this->tableWithSchema());
     }
 
     /**
